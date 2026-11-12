@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>三维模型</title>
+<link rel="stylesheet" href="style.css?v=3">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  body { display: flex; flex-direction: column; background: #eef2f6; }
+  #view { flex: 1; position: relative; touch-action: none; }
+  #view canvas { display: block; }
+  .tools { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .tools button {
+    border: 0; background: rgba(255,255,255,.92); color: var(--brand); font-size: 13px; font-weight: 600;
+    padding: 8px 10px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  }
+  .hint { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 12px; color: var(--muted); pointer-events: none; }
+  .pick {
+    position: absolute; left: 10px; right: 10px; bottom: 34px; background: #fff; border-radius: 10px;
+    padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,.12); display: none;
+  }
+  .pick b { color: var(--brand); }
+  .pick div { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="bar"><a href="index.html">‹ 返回</a><div class="t" id="t">三维模型</div><a href="drawing.html">图纸</a><a id="dl-ifc" href="files/ZJ-GKZ1-01.ifc" download>下载IFC</a></div>
+<div id="view">
+  <div class="loading" id="loading">模型加载中…</div>
+  <div class="tools">
+    <button id="b-reset">全景</button>
+    <button id="b-top">柱顶</button>
+    <button id="b-base">柱脚</button>
+  </div>
+  <div class="pick" id="pick"><b id="pick-n"></b><div id="pick-i"></div></div>
+  <div class="hint">单指旋转 · 双指缩放/平移 · 点一下查看部件</div>
+</div>
+
+<script src="common.js?v=3"></script>
+<script src="lib/viewer.js?v=3"></script>
+<script>
+ZJ.loadData().then(function (d) {
+  document.getElementById('t').textContent = (d['构件编号'] || '') + ' 三维模型';
+  document.title = (d['构件编号'] || '') + ' 三维模型';
+  var ifc = (d['外部文件'] || {})['IFC']; var dl = document.getElementById('dl-ifc'); if (ifc) dl.href = ifc; else dl.style.display = 'none';
+  var pick = document.getElementById('pick');
+  var v = window.startViewer(d, document.getElementById('view'), function (name, info) {
+    if (!name) { pick.style.display = 'none'; return; }
+    document.getElementById('pick-n').textContent = name;
+    document.getElementById('pick-i').textContent = info || '';
+    pick.style.display = 'block';
+  });
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('b-reset').onclick = v.reset;
+  document.getElementById('b-top').onclick = v.top;
+  document.getElementById('b-base').onclick = v.base;
+}).catch(function (e) {
+  document.getElementById('loading').textContent = '模型加载失败：' + (e && e.message || e);
+});
+</script>
+</body>
+</html>

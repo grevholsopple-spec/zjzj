@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>构件信息</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #efefef;
+    color: #333;
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .list { padding: 6px 10px 24px; }
+  .row { display: flex; align-items: flex-start; padding: 8px 0; min-height: 20px; }
+  .k { flex: 0 0 78px; color: #333; }
+  .v { flex: 1; word-break: break-all; }
+  .v a { color: #1aad19; text-decoration: none; }
+  .grp { font-weight: 700; padding: 10px 0 2px; }
+</style>
+</head>
+<body>
+<div class="list" id="list"></div>
+
+<script src="common.js?v=3"></script>
+<script>
+(function () {
+  var FIELDS = ['工程名称', '产品名称', '构件清单', '构件编号', '构件规格', '构件长度', '构件类型', '材质', '数量',
+    '生产线', '生产线负责人', '条码号', '条码类型', '工程子项', '构件位置'];
+  function row(k, vHtml) { return '<div class="row"><div class="k">' + ZJ.esc(k) + '：</div><div class="v">' + vHtml + '</div></div>'; }
+
+  ZJ.loadData().then(function (d) {
+    var html = '';
+    FIELDS.forEach(function (k) { html += row(k, ZJ.esc(d[k])); });
+    html += row('IFC下载', '<a href="model.html">查看IFC图纸</a>');
+    html += row('图纸下载', '<a href="drawing.html">查看图纸</a>');
+    html += row('构件质检', '');
+    (d['质检记录'] || []).forEach(function (q) {
+      html += '<div class="grp">' + ZJ.esc(q['工段']) + ' - ' + ZJ.esc(q['检查项']) + '</div>';
+      html += row('质检员', ZJ.esc(q['质检员']));
+      html += row('检测结果', ZJ.esc(q['检测结果']));
+      html += row('检测时间', ZJ.esc(q['检测时间']));
+    });
+    document.getElementById('list').innerHTML = html;
+  }).catch(ZJ.showError);
+})();
+</script>
+</body>
+</html>
