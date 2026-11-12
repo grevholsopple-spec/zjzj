@@ -107,6 +107,9 @@ function buildDrawingSVG(d) {
   title(sx, 22, '1-1 剖面', '1:' + rS);
   rect(sx - w / 2, sy - h / 2, w, h, C.fill, C.geo, 0.5);
   rect(sx - w / 2 + s.tw * kS, sy - h / 2 + s.tf * kS, w - 2 * s.tw * kS, h - 2 * s.tf * kS, '#fff', C.geo, 0.4);
+  // 给 CAD 导出用的剖面填充标记（网页里不显示）
+  out.push('<g data-hatch="' + [sx - w / 2, sy - h / 2, w, h, sx - w / 2 + s.tw * kS, sy - h / 2 + s.tf * kS,
+    w - 2 * s.tw * kS, h - 2 * s.tf * kS].map(P).join(',') + '"/>');
   line(sx - w / 2 - 6, sy, sx + w / 2 + 6, sy, C.cl, 0.2, '6 1.2 1 1.2');
   line(sx, sy - h / 2 - 6, sx, sy + h / 2 + 6, C.cl, 0.2, '6 1.2 1 1.2');
   dimH(sx - w / 2, sx + w / 2, sy - h / 2 - 8, String(s.B));

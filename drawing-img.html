@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=6, user-scalable=yes">
+<title>构件图纸</title>
+<link rel="stylesheet" href="style.css?v=4">
+<style>
+  body { background: #e9ecf1; }
+  .sheet { background: #fff; margin: 12px auto; max-width: 900px; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .sheet img, .sheet svg { display: block; width: 100%; height: auto; }
+  .tip { text-align: center; color: var(--muted); font-size: 13px; padding: 4px 16px 0; }
+  .row { display: flex; gap: 10px; justify-content: center; padding: 6px 12px 24px; flex-wrap: wrap; }
+  .row a { color: var(--brand); background: #fff; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="bar"><a href="drawing.html">‹ CAD版</a><div class="t" id="t">构件图纸</div></div>
+<div class="tip">双指放大查看细节，长按图纸可保存到手机</div>
+<div class="sheet" id="sheet"></div>
+<div class="row" id="row"></div>
+
+<script src="common.js?v=4"></script>
+<script src="drawing.js?v=4"></script>
+<script>
+ZJ.loadData().then(function (d) {
+  document.getElementById('t').textContent = (d['构件编号'] || '') + ' 构件详图';
+  document.title = (d['构件编号'] || '') + ' 构件详图';
+  var svg = buildDrawingSVG(d);
+  var sheet = document.getElementById('sheet');
+  sheet.innerHTML = svg; // 先直接显示矢量图
+
+  // 再转成 PNG 图片，这样微信里长按可以“保存图片”
+  try {
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var c = document.createElement('canvas');
+        c.width = 2376; c.height = 3360; // A3 约 200dpi
+        var g = c.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(img, 0, 0, c.width, c.height);
+        var png = new Image();
+        png.alt = '构件详图';
+        png.src = c.toDataURL('image/png');
+        png.onload = function () { sheet.innerHTML = ''; sheet.appendChild(png); };
+      } catch (e) { /* 转换失败就保留矢量图 */ }
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  } catch (e) {}
+
+  var ext = d['外部文件'] || {};
+  var row = document.getElementById('row');
+  if (ext['图纸PDF']) row.innerHTML += '<a href="' + ZJ.esc(ext['图纸PDF']) + '">打开图纸 PDF</a>';
+  row.innerHTML += '<a href="model.html">查看三维模型 ›</a>';
+}).catch(ZJ.showError);
+</script>
+</body>
+</html>
